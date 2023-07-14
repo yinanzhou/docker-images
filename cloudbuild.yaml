@@ -1,0 +1,13 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker login --username=${_DOCKER_HUB_USERNAME} --password=${_DOCKER_HUB_PASSWORD}']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker build -t yinanzhou/${_TARGET} .']
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push yinanzhou/${_TARGET}']
+options:
+  logging: CLOUD_LOGGING_ONLY

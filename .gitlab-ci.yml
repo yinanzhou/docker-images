@@ -1,0 +1,59 @@
+variables:
+  GCLOUD_VAR_SUB: '_DOCKER_HUB_USERNAME=$DOCKER_HUB_USERNAME,_DOCKER_HUB_PASSWORD=$DOCKER_HUB_PASSWORD'
+
+default:
+  image: google/cloud-sdk:latest
+  before_script:
+    - gcloud auth activate-service-account $GCLOUD_SERVICE_ACCOUNT_EMAIL --key-file=$GCLOUD_SERVICE_ACCOUNT_KEY_FILE
+  timeout: 10m
+
+build:hugo:
+  stage: build
+  script:
+    - >
+      gcloud builds submit
+      --account=$GCLOUD_SERVICE_ACCOUNT_EMAIL
+      --project=$GCLOUD_PROJECT_ID
+      --region=us-central1
+      --async
+      --config cloudbuild.yaml
+      --substitutions=$GCLOUD_VAR_SUB,_TARGET=hugo
+      hugo
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - hugo/**/*
+  
+build:firebase:database-emulator:
+  stage: build
+  script:
+    - >
+      gcloud builds submit
+      --account=$GCLOUD_SERVICE_ACCOUNT_EMAIL
+      --project=$GCLOUD_PROJECT_ID
+      --region=us-central1
+      --async
+      --config cloudbuild.yaml
+      --substitutions=$GCLOUD_VAR_SUB,_TARGET=firebase:database-emulator
+      firebase/database-emulator
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - firebase/database-emulator/**/*
+  
+build:wrangler:
+  stage: build
+  script:
+    - >
+      gcloud builds submit
+      --account=$GCLOUD_SERVICE_ACCOUNT_EMAIL
+      --project=$GCLOUD_PROJECT_ID
+      --region=us-central1
+      --async
+      --config cloudbuild.yaml
+      --substitutions=$GCLOUD_VAR_SUB,_TARGET=wrangler
+      wrangler
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - wrangler/**/*
