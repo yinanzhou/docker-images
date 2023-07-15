@@ -31,18 +31,18 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-firebase:database-emulator'
     entrypoint: 'bash'
-    args: ['-c', 'docker build -t yinanzhou/firebase:database-emulator firebase']
+    args: ['-c', 'docker build -t yinanzhou/firebase:database-emulator firebase/database-emulator']
     waitFor: ['auth']
 
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args: ['-c', 'docker push yinanzhou/hugo']
     waitFor: ['build-hugo']
-  - name: 'gcr.io/cloud-builders/wrangler'
+  - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args: ['-c', 'docker push yinanzhou/wrangler']
     waitFor: ['build-wrangler']
-  - name: 'gcr.io/cloud-builders/firebase:database-emulator'
+  - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args: ['-c', 'docker push yinanzhou/firebase:database-emulator']
     waitFor: ['build-firebase:database-emulator']
