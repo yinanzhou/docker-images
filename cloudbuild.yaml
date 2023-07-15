@@ -14,14 +14,37 @@
 
 steps:
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'auth'
     entrypoint: 'bash'
     args: ['-c', 'docker login --username=${_DOCKER_HUB_USERNAME} --password=${_DOCKER_HUB_PASSWORD}']
 
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-hugo'
     entrypoint: 'bash'
-    args: ['-c', 'docker build -t yinanzhou/${_TARGET} .']
+    args: ['-c', 'docker build -t yinanzhou/hugo hugo']
+    waitFor: ['auth']
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-wrangler'
+    entrypoint: 'bash'
+    args: ['-c', 'docker build -t yinanzhou/wrangler wrangler']
+    waitFor: ['auth']
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-firebase:database-emulator'
+    entrypoint: 'bash'
+    args: ['-c', 'docker build -t yinanzhou/firebase:database-emulator firebase']
+    waitFor: ['auth']
+
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
-    args: ['-c', 'docker push yinanzhou/${_TARGET}']
+    args: ['-c', 'docker push yinanzhou/hugo']
+    waitFor: ['build-hugo']
+  - name: 'gcr.io/cloud-builders/wrangler'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push yinanzhou/wrangler']
+    waitFor: ['build-wrangler']
+  - name: 'gcr.io/cloud-builders/firebase:database-emulator'
+    entrypoint: 'bash'
+    args: ['-c', 'docker push yinanzhou/firebase:database-emulator']
+    waitFor: ['build-firebase:database-emulator']
 options:
   logging: CLOUD_LOGGING_ONLY
