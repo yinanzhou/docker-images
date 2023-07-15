@@ -14,5 +14,5 @@
 
 FROM golang:alpine
 
-RUN apk update && apk add hugo
+RUN apk update && apk add hugo git
 RUN hugo version
